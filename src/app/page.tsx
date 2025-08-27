@@ -1,103 +1,169 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect } from 'react'
+
+interface User {
+  id: number
+  name: string
+  username: string
+  email: string
+}
+
+interface Post {
+  id: number
+  title: string
+  body: string
+  userId: number
+}
+
+interface Todo {
+  id: number
+  title: string
+  completed: boolean
+  userId: number
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [users, setUsers] = useState<User[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
+  const [todos, setTodos] = useState<Todo[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'users' | 'posts' | 'todos'>('users')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        
+        const [usersRes, postsRes, todosRes] = await Promise.all([
+          fetch('https://jsonplaceholder.typicode.com/users'),
+          fetch('https://jsonplaceholder.typicode.com/posts'),
+          fetch('https://jsonplaceholder.typicode.com/todos')
+        ])
+
+        const [usersData, postsData, todosData] = await Promise.all([
+          usersRes.json(),
+          postsRes.json(),
+          todosRes.json()
+        ])
+
+        setUsers(usersData.slice(0, 5))
+        setPosts(postsData.slice(0, 5))
+        setTodos(todosData.slice(0, 5))
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  return (
+    <div className="min-h-screen p-8 font-sans">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          JSONPlaceholder API Sample
+        </h1>
+
+        <div className="flex justify-center mb-6 space-x-4">
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'users'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Users
+          </button>
+          <button
+            onClick={() => setActiveTab('posts')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'posts'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
-            Read our docs
-          </a>
+            Posts
+          </button>
+          <button
+            onClick={() => setActiveTab('todos')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'todos'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Todos
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <p className="mt-4 text-gray-600">Loading data...</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            {activeTab === 'users' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Users</h2>
+                <div className="space-y-4">
+                  {users.map(user => (
+                    <div key={user.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <h3 className="font-semibold text-lg">{user.name}</h3>
+                      <p className="text-gray-600">@{user.username}</p>
+                      <p className="text-blue-600">{user.email}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'posts' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Posts</h2>
+                <div className="space-y-4">
+                  {posts.map(post => (
+                    <div key={post.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
+                      <p className="text-gray-700">{post.body}</p>
+                      <p className="text-sm text-gray-500 mt-2">User ID: {post.userId}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'todos' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Todos</h2>
+                <div className="space-y-4">
+                  {todos.map(todo => (
+                    <div key={todo.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <h3 className={`font-medium ${todo.completed ? 'line-through text-gray-500' : ''}`}>
+                          {todo.title}
+                        </h3>
+                        <span className={`px-2 py-1 rounded text-sm ${
+                          todo.completed 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {todo.completed ? 'Completed' : 'Pending'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">User ID: {todo.userId}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  );
+  )
 }
